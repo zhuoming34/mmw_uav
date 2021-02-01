@@ -11,5 +11,8 @@
 ## simulate_radar_signal.m
 - Simulates radar signal based on radar configuration in variable_library_radar.m
 
+## radar_dsp.m
+- Processes radar signal to generate a intensity heatmap
+
 ## pc2i.m
   Generates depth image from physical point cloud
