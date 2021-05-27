@@ -1,4 +1,4 @@
-# 
+# box_generator.m
 Generate single box point cloud
 
 # sceneSetup.m
