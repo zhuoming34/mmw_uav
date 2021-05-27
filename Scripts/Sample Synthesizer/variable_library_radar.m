@@ -55,6 +55,7 @@ TX_pos = [tx_pos1,0,tx_pos3]; % TX antenna position [0.44,0,0]
 % For our custombuilt radar, TX is placed 44cm to the right of the origin (RX array center)
 
 array_size = [24,64]; %[40,40]; % antenna array size / number of elements on the x and z axis
+array_size2 = [24,2];
 array_gap = [2.5e-3,2.5e-3]; % antenna element spacing, 2.5mm
 
 array_x_idx = (1:array_size(1))-ceil(array_size(1)/2);
