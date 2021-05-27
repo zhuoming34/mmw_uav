@@ -1,9 +1,11 @@
-# Sample Generator
-Generates sample points for model training. Each sample point consists of a 3D radar intensity map and a 2D depth image. 
+# 
+Generate single box point cloud
 
-# radarSph2Cart
-Converts the 3d radar intensity map from spherical coordinate system to Cartesian coordinate system
+#
+Set up a scene with multiple boxes point cloud
 
-# showPC2I_pp
-Generates 2d depth image from camera reflector point cloud by perspective projection
+# Ptc2DepImg.m
+Genreate 2D depth images from point cloud models with perspective projection
 
+# radarSph2Cart.m
+Convert 3D intensity maps from spherical coordinate to Cartesian coordinate with a speicified boundary 
