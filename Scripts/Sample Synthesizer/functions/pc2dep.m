@@ -1,0 +1,102 @@
+function [Dep1,Dep2,reszImg] = pc2dep(ptCloud)
+
+    variable_library_camera; % load camera configurations
+    
+    x = ptCloud(:,1); y = ptCloud(:,2); z = ptCloud(:,3);
+    
+    % perspective projection for each point
+    py = linspace(f,f,size(y,1))'; % focal length
+    ratio = y./py;
+    px = -x./ratio;
+    pz = -z./ratio;
+
+    % remove pts that out of bound
+    if (min(px)<-ppH||max(px)>ppH || min(pz)<-ppV||max(pz)>ppV)
+        disp("remove out-of-bound points");
+        ppts = [px,py,pz];
+        pt_temp = zeros(size(ppts,1),1);
+        for i = 1:size(ppts,1)
+            if (px(i)<-ppH||px(i)>ppH || pz(i)<-ppV||pz(i)>ppV)
+                continue;
+            end
+            pt_temp(i) = 1;
+        end
+        visible_ptCloud_idx = find(pt_temp);
+        visible_ptCloud = zeros(size(visible_ptCloud_idx,1),3);
+        visible_ptCloud_pp = zeros(size(visible_ptCloud_idx,1),3); % pts on projection plane
+        for i = 1:size(visible_ptCloud_idx,1)
+            visible_ptCloud(i) = ptCloud(visible_ptCloud_idx(i));
+            visible_ptCloud_pp(i) = ppts(visible_ptCloud_idx(i));
+        end
+        x = visible_ptCloud(:,1); y = visible_ptCloud(:,2); z = visible_ptCloud(:,3);
+        px = visible_ptCloud_pp(:,1); py = visible_ptCloud_pp(:,2); pz = visible_ptCloud_pp(:,3);
+    else
+        disp("no point is out of bound");
+    end
+
+    % ---- depth calculation ----
+    d = sqrt(x.^2 + y.^2 + z.^2);
+    %sn_d = sqrt(sn_x.^2 + sn_y.^2 + sn_z.^2);
+
+    % grid construction
+    xl = -ppH/2; xr = ppH/2; zl = -ppV/2; zr = ppV/2;
+    xx = linspace(xr,xl,numc); zz = linspace(zl,zr,numr);
+    [X,Z] = meshgrid(xx,zz);
+    grid_centers = [X(:),Z(:)];
+
+    % classification
+    clss = knnsearch(grid_centers,[px,pz]); 
+    % defintion of local statistic
+    local_stat = @(x)min(x); 
+    %local_stat = @(x)mean(x); 
+    % data_grouping
+    class_stat = accumarray(clss,d,[numr*numc 1],local_stat);
+    % 2D reshaping
+    class_stat_M  = reshape(class_stat , size(X)); 
+    % Force un-filled cells to the brightest color
+    % add limits at front and back
+    s1 = size(class_stat_M,1);
+    s2 = size(class_stat_M,2);
+    class_stat_M(1,s2/2) = r1; % 0.1m
+    class_stat_M(s1,s2/2) = r2; % 15.0m
+    class_stat_M (class_stat_M == 0) = max(max(class_stat_M));
+    % flip image horizontally and vertically
+    %I0 = class_stat_M(end:-1:1,end:-1:1);
+    %I0 = class_stat_M(end:-1:1,:);
+    %I0 = class_stat_M(:,end:-1:1); % flip image horizontally
+    % normalize pixel values to [0,1]
+    I0 = class_stat_M;
+    I = ( I0 - min(min(I0)) ) ./ ( max(max(I0)) - min(min(I0)) );
+
+    % extend and crop to the same size of scene
+    N_col_l = ceil(abs((sn_px(3)-xl)/(pxSize/1000))); % extend
+    N_col_r = ceil(abs((sn_px(1)-xr)/(pxSize/1000))); % extend
+    N_row_t = floor(abs((sn_pz(1)-zr)/(pxSize/1000))); % crop
+    N_row_b = ceil(abs((sn_pz(2)-zl)/(pxSize/1000))); % extend
+    N_col = numc + N_col_l + N_col_r; N_row = numr - N_row_t + N_row_b;
+    col_l = ones(N_row,N_col_l); col_r = ones(N_row,N_col_r);
+    row_b = ones(N_row_b, numc);
+    %I2 = [col_l,[I(N_row_t+1:end,:);row_b],col_r];
+    I2 = [col_l,[row_b;I(1:end-N_row_t,:)],col_r];
+
+    % saving images
+    Dep1 = abs(I - 1)*255;
+    Dep2 = abs(I2 - 1)*255;
+    reszImg = imresize(Dep2, [128,128]);
+    %{
+    map = jet;
+    map2 = gray;
+
+    outputBaseFileName1 = strcat(outaddr1,'cam',num2str(cam+camos),'/',num2str(idx+os),'.png');
+    imwrite(Dep1, map, outputBaseFileName1); 
+
+    outputBaseFileName2 = strcat(outaddr2,'cam',num2str(cam+camos),'/',num2str(idx+os),'.png');
+    imwrite(Dep2, map, outputBaseFileName2); 
+
+    outputBaseFileName3 = strcat(outaddr3,'cam',num2str(cam+camos),'/',num2str(idx+os),'.png');
+    imwrite(reszImg, map, outputBaseFileName3);
+
+    outputBaseFileName4 = strcat(outaddr4,'cam',num2str(cam+camos),'/',num2str(idx+os),'.png');
+    imwrite(reszImg, map2, outputBaseFileName4); 
+    %}
+end
