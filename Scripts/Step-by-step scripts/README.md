@@ -1,7 +1,7 @@
 # 
 Generate single box point cloud
 
-#
+# sceneSetup.m
 Set up a scene with multiple boxes point cloud
 
 # Ptc2DepImg.m
