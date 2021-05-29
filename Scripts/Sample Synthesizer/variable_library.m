@@ -10,7 +10,7 @@ for k_rotate_ang_fine = rotate_ang_fine
 end
 rotate_ang = sort(rotate_ang);
 
-translate_lim = [-4000, 4000; 3500, 10000]; % limits of the translation along the x and y axis
+translate_lim = [-3000, 3000; 2000, 8000]; % limits of the translation along the x and y axis
 %translate_lim = [-600, 600; 2300, 3500]; % 4-way boundary
 translate_x_res = 10; %500; % resolution of translation along the x axis unit: mm
 translate_y_res = 10; %500; % resolution of translation along the y axis unit: mm
