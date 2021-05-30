@@ -161,7 +161,7 @@ function [] = main
                 % Radar signal processing, generating 3D radar heatmaps
                 % radar_heatmap_noisy = radar_dsp(signal_array_noisy); % full-scale
                 signal_array_noisy2 = signal_array_noisy(:,:,32:33); % 2 snapshots in the middle vertically
-                radar_heatmap_noisy = radar_dsp(signal_array_noisy2);
+                radar_heatmap_noisy = radar_dsp2ss(signal_array_noisy2);
                 %save(strcat(heataddr,'md_',num2str(CAD_idx),'_pm_',num2str(ks+os),'_cam_',num2str(cs),'_radar_heatmap2_noisy','.mat'), 'radar_heatmap_noisy');
 
                 % Convert spherical coordinate to Cartesian coordinate
