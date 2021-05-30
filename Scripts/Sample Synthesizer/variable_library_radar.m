@@ -60,9 +60,10 @@ array_gap = [2.5e-3,2.5e-3]; % antenna element spacing, 2.5mm
 
 array_x_idx = (1:array_size(1))-ceil(array_size(1)/2);
 array_x_idx = array_x_idx.';
-
 array_z_idx = (1:array_size(2))-ceil(array_size(2)/2);
 
-
+array_x_idx2 = (1:array_size2(1))-ceil(array_size2(1)/2);
+array_x_idx2 = array_x_idx2.';
+array_z_idx2 = (1:array_size2(2))-ceil(array_size2(2)/2);
 
   
