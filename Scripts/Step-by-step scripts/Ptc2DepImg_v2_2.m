@@ -122,8 +122,8 @@ for idx = 1:2500
         % usually N_col_l = N_col_r
         N_col_l = ceil(abs((sn_px(3)-xl))/(pxSize/1000));
         N_col_r = ceil(abs((sn_px(1)-xr))/(pxSize/1000));
-        N_row_t = ceil(abs((sn_pz(1)-zt))/(pxSize/1000));
-        N_row_b = ceil(abs((sn_pz(2)-zb))/(pxSize/1000));
+        N_row_b = ceil(abs((sn_pz(1)-zt))/(pxSize/1000));
+        N_row_t = ceil(abs((sn_pz(2)-zb))/(pxSize/1000));
         if sn_px(3) <= xl || sn_px(1) >= xr
             col_l = ones(numr,N_col_l); col_r = ones(numr,N_col_r); % extend
             Ic = [col_l,I,col_r];
@@ -133,24 +133,24 @@ for idx = 1:2500
             N_col = numc - N_col_l - N_col_r;
         end
         
-        if sn_pz(1) >= zt
-            row_t = ones(N_row_t,N_col); % extend
-            It = [row_t;Ic];
-            N_row = numr + N_row_t;
-        else
-            It = Ic(N_row_t+1:end,:); % crop
-            N_row = numr - N_row_t;
-        end
-        
-        if sn_pz(2) <= zb
+        if sn_pz(1) >= zt % positive on projection plane
             row_b = ones(N_row_b,N_col); % extend
             Ib = [Ic;row_b];
-            N_row = N_row + N_row_b;
+            N_row = numr + N_row_b;
         else
-            Ib = It(1:end-N_row_b,:); % crop
-            N_row = N_row - N_row_b;
+            Ib = Ic(1:end-N_row_b,:); % crop
+            N_row = numr - N_row_b;
         end
-        I2 = Ib;
+        
+        if sn_pz(2) <= zb % negative on projection plane
+            row_t = ones(N_row_t,N_col); % extend
+            It = [row_t;Ic];
+            N_row = N_row + N_row_t;
+        else
+            It = Ib(N_row_t+1:end,:); % crop
+            N_row = N_row - N_row_t;
+        end
+        I2 = It;
 
         % saving images
         Dep1 = abs(I - 1)*255;
