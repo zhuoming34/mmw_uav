@@ -9,6 +9,7 @@ function [] = main
     clk0 = clock;disp("Start");disp(clk0);
     
     addpath('functions');
+    addpath('functions/sph2cart_functions');
     variable_library;
         
     cam_x = [0,5000,0,-5000]; %mm
@@ -26,10 +27,13 @@ function [] = main
     
     %%% heatmap spherical-to-Cartesian conversion preparation 
     N_phi = 64; N_rho = 256; N_theta = 64;
-    scene_lim = [-4, 4; 3, 10; -1.25, 2.75];
+    N_x= 64; N_y = 256; N_z = 64;
+    scene_lim = [-3, 3; 2, 8; -1.25, 2.75];
     % convert points into cartesian coordinates
     [x_ct,y_ct,z_ct] = sph2cart_pts(N_phi,N_rho,N_theta);
     ct_coord = [x_ct,y_ct,z_ct];
+    % construct a 3d-point-grid and assign value to each point
+    [ptGrid,ptGrid_heat] = gridpts_contruct(N_x,N_y,N_z,scene_lim);
 
 %%
     for CAD_idx = 7
@@ -166,7 +170,7 @@ function [] = main
 
                 % Convert spherical coordinate to Cartesian coordinate
                 % with a specified boundary
-                heatmap_ct = heatSph2Cart(radar_heatmap_noisy, ct_coord, scene_lim, N_phi, N_rho, N_theta);
+                heatmap_ct = heatSph2Cart(radar_heatmap_noisy, ct_coord, scene_lim, N_x, N_y, N_z, ptGrid, ptGrid_heat);
                 save(strcat(cartaddr,'md_',num2str(CAD_idx),'_pm_',num2str(ks+os),'_cam_',num2str(cs),'_cart_heatmap2_noisy','.mat'), 'heatmap_ct');
                 
                 disp(strcat("Model ", num2str(CAD_idx),", placement ", num2str(ks+os),", camera ", num2str(cs), " finished"));           
