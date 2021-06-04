@@ -89,8 +89,8 @@ for idx = 1:2500
         %sn_d = sqrt(sn_x.^2 + sn_y.^2 + sn_z.^2);
 
         % grid construction
-        xl = -ppH/2; xr = ppH/2; zl = -ppV/2; zr = ppV/2;
-        xx = linspace(xr,xl,numc); zz = linspace(zl,zr,numr);
+        xl = -ppH/2; xr = ppH/2; zb = -ppV/2; zt = ppV/2;
+        xx = linspace(xr,xl,numc); zz = linspace(zb,zt,numr);
         [X,Z] = meshgrid(xx,zz);
         grid_centers = [X(:),Z(:)];
 
