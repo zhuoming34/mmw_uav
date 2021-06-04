@@ -16,7 +16,7 @@ function heatmap_ct = sph2cart_heat(scene_lim,N_x,N_y,N_z,pts,radar_heat)
     %class_stat = accumarray(clss,radar_heat,[numr*numc*256 1],local_stat); % data_grouping
     class_stat = accumarray(clss,radar_heat,[N_x*N_y*N_z 1],local_stat); % data_grouping
     heatmap_ct  = reshape(class_stat , size(X)); % 3D reshaping
-
+    
     for id_y = 1:N_y
         for id_x = 1:N_x
             for id_z = 1:N_z
@@ -50,5 +50,5 @@ function heatmap_ct = sph2cart_heat(scene_lim,N_x,N_y,N_z,pts,radar_heat)
             end
         end
     end
-
+    
 end
