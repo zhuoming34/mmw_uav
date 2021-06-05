@@ -43,11 +43,11 @@ for idx_mat = 1:500
             radar_heat_filtered(i) = radar_heat(idx_heat_fliter(i));
         end
         % no filtering
-        %pt_heat_fl = ct_coord;
-        %heat_fl = radar_heat;
-        %x_hf = pt_heat_fl(:,1); y_hf = pt_heat_fl(:,2); z_hf = pt_heat_fl(:,3);
+        %ct_coord_filtered = ct_coord;
+        %radar_heat_filtered = radar_heat;
+        %x_hf = ct_coord_filtered(:,1); y_hf = ct_coord_filtered(:,2); z_hf = ct_coord_filtered(:,3);
         % convert heatmap from spherical to cartesian coordinate system
-        % heatmap_ct = sph2cart_heat(scene_lim,N_x,N_y,N_z,pt_heat_fl,heat_fl);
+        % heatmap_ct = sph2cart_heat(scene_lim,N_x,N_y,N_z,ct_coord_filtered,radar_heat_filtered);
         
         
         % ver 3.1
