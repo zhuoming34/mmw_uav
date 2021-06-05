@@ -34,6 +34,7 @@ function [] = main
     ct_coord = [x_ct,y_ct,z_ct];
     % construct a 3d-point-grid and assign value to each point
     [ptGrid,ptGrid_heat] = gridpts_contruct(N_x,N_y,N_z,scene_lim);
+    ptGrid_clss = knnsearch(ct_coord,ptGrid,'K',1); % points classification
 
 %%
     for CAD_idx = 7
@@ -170,7 +171,7 @@ function [] = main
 
                 % Convert spherical coordinate to Cartesian coordinate
                 % with a specified boundary
-                heatmap_ct = heatSph2Cart(radar_heatmap_noisy, ct_coord, scene_lim, N_x, N_y, N_z, ptGrid, ptGrid_heat);
+                heatmap_ct = heatSph2Cart(radar_heatmap_noisy, ct_coord, scene_lim, N_x, N_y, N_z, ptGrid, ptGrid_heat, ptGrid_clss);
                 save(strcat(cartaddr,'md_',num2str(CAD_idx),'_pm_',num2str(ks+os),'_cam_',num2str(cs),'_cart_heatmap2_noisy','.mat'), 'heatmap_ct');
                 
                 disp(strcat("Model ", num2str(CAD_idx),", placement ", num2str(ks+os),", camera ", num2str(cs), " finished"));           
