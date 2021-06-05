@@ -1,5 +1,5 @@
 % 06/02/2021
-% ver3.3, for converting multiple .mat files
+% ver 4.0, for converting multiple .mat files
 % convert radar heatmap in hawkeye synthesizer
 % from spherical coordinates (r,theta,phi)to cartesian coordinates (x,y,z)
 % take the logarithmic value to scale the heatmap, reduce the differences
