@@ -16,39 +16,45 @@ scene_lim = [-4, 4; 3, 10; -1.25, 2.75];
 ct_coord = [x_ct,y_ct,z_ct];
 
 % construct a 3d-point-grid and assign value to each point
-[ptGrid,ptGrid_heat] = gridpts_contruct(N_x,N_y,N_z,scene_lim);
-ptGrid_clss = knnsearch(ct_coord,ptGrid,'K',1); % points classification
+%[ptGrid,ptGrid_heat,numPoint] = gridpts_contruct(N_x,N_y,N_z,scene_lim);
+%ptGrid_clss = knnsearch(ct_coord,ptGrid,'K',1); % points classification
 
 addr = '/home/huang/Documents/HawkEye-Data-Code-master/Synthesizer/model1/20210402/heat2ss/';
 saveaddr = '/home/huang/Documents/HawkEye-Data-Code-master/Synthesizer/model1/20210402/cart2ss/';
 offset = 0;
 camos = 0;
-CAD_idx = 1;
+CAD_idx = 10;
+ 
 for idx_mat = 1:500
     for cam = 1:4
-        filename = strcat('md_',num2str(CAD_idx),'_pm_',num2str(idx_mat+offset),'_cam_',num2str(cam),'_radar_heatmap2_noisy');
-        mat = load(strcat(addr,filename,'.mat'));
-        heatmap = mat.radar_heatmap_noisy;
-        
+        %filename = strcat('md_',num2str(CAD_idx),'_pm_',num2str(idx_mat+offset),'_cam_',num2str(cam),'_radar_heatmap2_noisy');
+        %mat = load(strcat(addr,filename,'.mat'));
+        %heatmap = mat.radar_heatmap_noisy;
+        heatmap = radar_heatmap_noisy;
         % match intensity values to corresponding spherical voxel center
         radar_heat = matchHeat(heatmap,N_phi,N_rho,N_theta);
-        for i = 1:numPoint
-            ptGrid_heat(i) = radar_heat(ptGrid_clss(i));
-        end 
+        
+        %for i = 1:length(ptGrid_clss)
+        %    ptGrid_heat(i) = radar_heat(ptGrid_clss(i));
+        %end 
         
         % filtering: get points whose intensities are larger than the threshold
         threshold = max(max(max(heatmap)))/50;
-        idx_heat_fliter = find(ptGrid_heat >= threshold);
-        ptGrid_filtered = zeros(size(idx_heat_fliter,1),3);
-        ptGrid_heat_filtered = zeros(size(idx_heat_fliter,1),1);
+        %idx_heat_fliter = find(ptGrid_heat >= threshold);
+        idx_heat_fliter = find(radar_heat >= threshold);
+        points_selected = zeros(size(idx_heat_fliter,1),3);
+        heat_selected = zeros(size(idx_heat_fliter,1),1);
         for i = 1:size(idx_heat_fliter,1)
-            ptGrid_filtered(i,:) = ptGrid(idx_heat_fliter(i),:);
-            ptGrid_heat_filtered(i) = ptGrid_heat(idx_heat_fliter(i));
+            points_selected(i,:) = ct_coord(idx_heat_fliter(i),:);
+            heat_selected(i) = radar_heat(idx_heat_fliter(i));
+            %points_selected(i,:) = ptGrid(idx_heat_fliter(i),:);
+            %heat_selected(i) = ptGrid_heat(idx_heat_fliter(i));
         end
         
         % generate 3d heatmap in Cartesian
-        heatmap_ct = sph2cart_heat2(scene_lim,N_x,N_y,N_z,ptGrid_filtered,ptGrid_heat_filtered);
-        
+        heatmap_ct = sph2cart_heat(scene_lim,N_x,N_y,N_z,points_selected,heat_selected);
+        %heatmap_ct = sph2cart_heat2(scene_lim,N_x,N_y,N_z,points_selected,heat_selected);
+        %heatmap_ct = sph2cart_heat2(scene_lim,N_x,N_y,N_z,ptGrid,ptGrid_heat);
         %{
         % logarithmic scale
         heatmap_ct = heatmap_ct + 1.0;
@@ -68,7 +74,7 @@ end
 
 
 %% plots
-show_plots = 0; idx_plots = [1];
+show_plots = 1; idx_plots = [1];
 if show_plots == 1
     for idx_plot = idx_plots
         if idx_plot == 1 || idx_plot == 3
@@ -80,7 +86,8 @@ if show_plots == 1
         % plot 2d radar heatmaps in spherical coordinates
         if idx_plot == 1 
             %show_heatmap2d(heatmap, cam_rft);
-            show_heatmap2d_cart(heatmap_ct,cam_rft);
+            reflectors_pts = reflector_cart_v_noisy; % reflector
+            show_heatmap2d_cart(heatmap_ct,reflectors_pts);
         end
         % plot point cloud in cartesian coordinate system
         if idx_plot == 2
@@ -91,7 +98,7 @@ if show_plots == 1
             max_intensity = max(max(max(heatmap_ct)));
             show_car = 1;
 %           show_scatter_heat_3d(cam_rft,ct_coord,radar_heat,max_intensity,show_car);
-            show_scatter_heat_3d(cam_rft,ptGrid,ptGrid_heat,max_intensity,show_car,50,10,10);
+            show_scatter_heat_3d(reflectors_pts,ptGrid,ptGrid_heat,max_intensity,show_car,50,10,10);
         end
         % plot 3d heatmap slice
         if idx_plot == 4
@@ -138,7 +145,7 @@ function [x_ct,y_ct,z_ct] = sph2cart_pts(N_phi,N_rho,N_theta)
 end
 
 % construct a set of grid center points 
-function [ptGrid,ptGrid_heat] = gridpts_contruct(N_x,N_y,N_z,scene_lim)
+function [ptGrid,ptGrid_heat,numPoint] = gridpts_contruct(N_x,N_y,N_z,scene_lim)
     xs = linspace(scene_lim(1,1),scene_lim(1,2),N_x);
     ys = linspace(scene_lim(2,1),scene_lim(2,2),N_y);
     zs = linspace(scene_lim(3,1),scene_lim(3,2),N_z);
@@ -295,12 +302,12 @@ function show_heatmap2d(heatmap,cam_rft)
 end
 
 % plot 2d radar heatmaps in Cartesian coordinates
-function show_heatmap2d_cart(heatmap,cam_rft)   
-    
+function show_heatmap2d_cart(heatmap,reflectors)   
+    maxheat = max(max(max(heatmap)));
     figure(); 
     font_size = 8;
     % Visulize the camera reflectors
-    subplot(221); scatter3(cam_rft(:,1),cam_rft(:,2),cam_rft(:,3),0.5,'filled','k');
+    subplot(221); scatter3(reflectors(:,1),reflectors(:,2),reflectors(:,3),0.5,'filled','k');
     xlabel('x (m)'); ylabel('y (m)'); zlabel('z (m)'); axis equal
     xlim([-4, 4]); ylim([0, 10]); zlim([-1.25, 2.75]); 
     set(gca,'FontSize',font_size);      
@@ -387,7 +394,7 @@ function show_slice_heat_3d(heatmap_ct)
 end
 
 % 3d heat scatter
-function show_scatter_heat_3d(cam_rft,ct_coord,radar_heat,max_intensity,show_car,th1,th2,th3)
+function show_scatter_heat_3d(reflectors,ct_coord,radar_heat,max_intensity,show_car,th1,th2,th3)
     threshold = max_intensity;
     threshold1 = threshold/th1;
     threshold2 = threshold/th2;
@@ -452,7 +459,7 @@ function show_scatter_heat_3d(cam_rft,ct_coord,radar_heat,max_intensity,show_car
     if show_car == 1
         hold on; 
         %scatter3(ct_coord_ds(:,1),ct_coord_ds(:,2),ct_coord_ds(:,3),0.1,'w'); hold on;
-        scatter3(cam_rft(:,1),cam_rft(:,2),cam_rft(:,3),0.5,'filled','k');
+        scatter3(reflectors(:,1),reflectors(:,2),reflectors(:,3),0.5,'filled','k');
     end
     xlabel('x (m)'); ylabel('y (m)'); zlabel('z (m)'); axis equal;
     xlim([-5 5]); ylim([0 10]); zlim([-1.25,3]); set(gca,'FontSize',font_size);
