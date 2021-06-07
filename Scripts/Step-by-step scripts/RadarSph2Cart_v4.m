@@ -9,7 +9,7 @@ format shortg;
 
 N_phi = 64; N_rho = 256; N_theta = 64;
 N_x= 64; N_y = 256; N_z = 64;
-scene_lim = [-4, 4; 3, 10; -1.25, 2.75];
+scene_lim = [-3, 3; 2, 8; -1.25, 2.75];
 
 % convert points into cartesian coordinates
 [x_ct,y_ct,z_ct] = sph2cart_pts(N_phi,N_rho,N_theta);
@@ -53,6 +53,8 @@ for idx_mat = 1:500
         
         % generate 3d heatmap in Cartesian
         heatmap_ct = sph2cart_heat(scene_lim,N_x,N_y,N_z,points_selected,heat_selected);
+        
+        % something wrong with the grid center method
         %heatmap_ct = sph2cart_heat2(scene_lim,N_x,N_y,N_z,points_selected,heat_selected);
         %heatmap_ct = sph2cart_heat2(scene_lim,N_x,N_y,N_z,ptGrid,ptGrid_heat);
         %{
@@ -234,7 +236,7 @@ function heatmap_ct = sph2cart_heat(scene_lim,N_x,N_y,N_z,pts,radar_heat)
     
 end
 
-% match the heatmap into cartesian coordinates
+% match the heatmap into cartesian coordinates with grid-center method
 function heatmap_ct = sph2cart_heat2(scene_lim,N_x,N_y,N_z,grid_pts,grid_heat)
     x_min = scene_lim(1,1); x_max = scene_lim(1,2);
     y_min = scene_lim(2,1); y_max = scene_lim(2,2);
