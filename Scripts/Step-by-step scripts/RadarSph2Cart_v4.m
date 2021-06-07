@@ -15,9 +15,12 @@ scene_lim = [-3, 3; 2, 8; -1.25, 2.75];
 [x_ct,y_ct,z_ct] = sph2cart_pts(N_phi,N_rho,N_theta);
 ct_coord = [x_ct,y_ct,z_ct];
 
+%%% Grid-center method: assign the values of spherical voxel to the neatest
+%%% centers of Cartesian voxel, then construct a grid using these voxel/grid
+%%% centers with their values.
 % construct a 3d-point-grid and assign value to each point
-%[ptGrid,ptGrid_heat,numPoint] = gridpts_contruct(N_x,N_y,N_z,scene_lim);
-%ptGrid_clss = knnsearch(ct_coord,ptGrid,'K',1); % points classification
+% [ptGrid,ptGrid_heat,numPoint] = gridpts_contruct(N_x,N_y,N_z,scene_lim);
+% ptGrid_clss = knnsearch(ct_coord,ptGrid,'K',1); % points classification
 
 addr = '/home/huang/Documents/HawkEye-Data-Code-master/Synthesizer/model1/20210402/heat2ss/';
 saveaddr = '/home/huang/Documents/HawkEye-Data-Code-master/Synthesizer/model1/20210402/cart2ss/';
@@ -52,9 +55,12 @@ for idx_mat = 1:500
         end
         
         % generate 3d heatmap in Cartesian
+        % ver2.3 method: assign value to the nearest Cartesian voxel
+        % directly from spherical voxels
         heatmap_ct = sph2cart_heat(scene_lim,N_x,N_y,N_z,points_selected,heat_selected);
         
-        % something wrong with the grid center method
+        % something wrong with the grid center method, lose more feature
+        % with 2 snapshots than ver2.3 method. (but better with 64 snapshots)
         %heatmap_ct = sph2cart_heat2(scene_lim,N_x,N_y,N_z,points_selected,heat_selected);
         %heatmap_ct = sph2cart_heat2(scene_lim,N_x,N_y,N_z,ptGrid,ptGrid_heat);
         %{
