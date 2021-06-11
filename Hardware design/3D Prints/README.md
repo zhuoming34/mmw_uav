@@ -1,5 +1,7 @@
 # Drone Frame Design
 
+(drone_frame_part1-7.stl files are printable design for Mark-III)
+
 ## Mark I:
 <img src="./drone_v1.jpg" width="300" />
 
