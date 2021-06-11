@@ -1,16 +1,16 @@
 # Drone Frame Design
 
 ## Mark I:
-<img src="./drone_v1.jpg" width="200" />
+<img src="./drone_v1.jpg" width="500" />
 
 ## Mark II:               
 -	https://a360.co/3cW5fhv
 -	Dimension: 285 x 285 x 140 mm
 -	Weight: 753 g (including new base, battery, Jetson Nano, Crazyflie, Stereo Pi (83g))
-<img src="./drone_v2.jpg" width="200" />
+<img src="./drone_v2.png" width="500" />
 
 ## Mark III (latest):                    
 -	https://a360.co/2MDfe0j
 -	Dimension: 285 x 300 x 160 mm
 -	Weight: ~930 g (including new base, battery, Jetson Nano, Crazyflie, ZED mini (60g), IWR6483ISK (8g), slider (~120g), stepper motors (70g))
-<img src="./drone_v3_2.jpg" width="200" />
+<img src="./drone_v3_2.png" width="500" />
