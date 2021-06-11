@@ -1,7 +1,7 @@
 # Drone Frame Design
 
 ## Mark I:
-![alt text](/./drone_v1.jpg?raw=true)
+![version 1.2](./drone_v1.jpg?raw=true)
 
 ## Mark II:               
 -	https://a360.co/3cW5fhv
