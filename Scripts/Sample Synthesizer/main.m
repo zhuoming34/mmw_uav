@@ -11,12 +11,13 @@ function [] = main
     addpath('functions');
     addpath('functions/sph2cart_functions');
     variable_library;
-        
-    cam_x = [0,5000,0,-5000]; %mm
-    cam_y = [0,5000,10000,5000]; %mm
+    
+    height_offset = -1250; % mm, sensor as origin
+    cam_x = [0,5000,0,-5000]; % mm
+    cam_y = [0,5000,10000,5000]; % mm
     cam_ang_deg = [0,90,180,270];
     
-    os = 0; %1000%2000; % index offset
+    ind_os = 0; %1000%2000; % index offset
     
     rootaddr = '/home/huang/Documents/HawkEye-Data-Code-master/Synthesizer/';
 
@@ -112,7 +113,7 @@ function [] = main
                         translate_x = new_x;
                         translate_y = new_y;
                 end
-                translate_z = -1250; % translate the point cloud -1250mm to compensate for the height of our radar 
+                translate_z = height_offset; % -1250; % translate the point cloud -1250mm to compensate for the height of our radar 
 
                 % translate
                 car_scene_v.translate = [translate_x, translate_y, translate_z]; % store translation information in the pc structure
@@ -127,18 +128,18 @@ function [] = main
                 %%% ---------- Depth Image ----------
                 % select camera reflectors
                 [visible_cart_v_dep] = remove_occlusion_v2(car_scene_v,"cam",0); % remove occluded body of the car for dep image
-                save(strcat(rftaddr,'md_',num2str(CAD_idx),'_pm_',num2str(ks+os),"_cam_",num2str(cs),'_CameraReflector','.mat'), 'visible_cart_v_dep');
-                [Dep1,Dep2,reszImg] = pc2dep(visible_cart_v_dep); % generate depth images
+                save(strcat(rftaddr,'md_',num2str(CAD_idx),'_pm_',num2str(ks+ind_os),"_cam_",num2str(cs),'_CameraReflector','.mat'), 'visible_cart_v_dep');
+                [depImg,reszImg,squrImg] = pc2dep(visible_cart_v_dep); % generate depth images
                 % save depth images
                 cmap1 = jet; cmap2 = gray;
-                outputImgName1 = strcat(figaddr,'original/cam',num2str(cam),'/',num2str(idx+os),'.png');      
-                outputImgName2 = strcat(figaddr,'extend/cam',num2str(cam),'/',num2str(idx+os),'.png');            
-                outputImgName3 = strcat(figaddr,'color128/cam',num2str(cam),'/',num2str(idx+os),'.png');
-                outputImgName4 = strcat(figaddr,'gray128/cam',num2str(cam),'/',num2str(idx+os),'.png');
-                imwrite(Dep1, cmap1, outputImgName1); 
-                imwrite(Dep2, cmap1, outputImgName2); 
-                imwrite(reszImg, cmap1, outputImgName3);
-                imwrite(reszImg, cmap2, outputImgName4); 
+                outputImgName1 = strcat(figaddr,'original/cam',num2str(cam),'/',num2str(idx+ind_os),'.png');      
+                outputImgName2 = strcat(figaddr,'extend/cam',num2str(cam),'/',num2str(idx+ind_os),'.png');            
+                outputImgName3 = strcat(figaddr,'color128/cam',num2str(cam),'/',num2str(idx+ind_os),'.png');
+                outputImgName4 = strcat(figaddr,'gray128/cam',num2str(cam),'/',num2str(idx+ind_os),'.png');
+                imwrite(depImg, cmap1, outputImgName1); % original size of depth image
+                imwrite(reszImg, cmap1, outputImgName2); % extended/cropped depth image
+                imwrite(squrImg, cmap1, outputImgName3); % scaled square depth image, color jet
+                imwrite(squrImg, cmap2, outputImgName4); % scaled square depth image, gray scale
                 
                 %%% ---------- Radar Heatmap ----------
                 % Modle radar point reflectors in the scene
@@ -156,7 +157,7 @@ function [] = main
                 % adding environmental noise
                 [evnoise] = add_evn_noise();
                 reflector_cart_v_noisy = [reflector_cart_v;evnoise];
-                save(strcat(rftaddr,'md_',num2str(CAD_idx),'_pm_',num2str(ks+os),'_cam_',num2str(cs),'_RadarReflectorNoisy','.mat'), 'reflector_cart_v_noisy');
+                save(strcat(rftaddr,'md_',num2str(CAD_idx),'_pm_',num2str(ks+ind_os),'_cam_',num2str(cs),'_RadarReflectorNoisy','.mat'), 'reflector_cart_v_noisy');
 
                 % Simualte received radar signal in the receiver antenna array     
                 % signal_array = simulate_radar_signal(reflector_cart_v); % with environment noise
@@ -172,10 +173,10 @@ function [] = main
                 % Convert spherical coordinate to Cartesian coordinate
                 % with a specified boundary
                 % heatmap_ct = heatSph2Cart(radar_heatmap_noisy, scene_lim, N_x, N_y, N_z, ptGrid, ptGrid_heat, ptGrid_clss);
-                heatmap_ct = heatSph2Cart(radar_heatmap_noisy,scene_lim, N_x, N_y, N_z, ct_coord);
-                save(strcat(cartaddr,'md_',num2str(CAD_idx),'_pm_',num2str(ks+os),'_cam_',num2str(cs),'_cart_heatmap2_noisy','.mat'), 'heatmap_ct');
+                heatmap_ct = heatSph2Cart(radar_heatmap_noisy,N_phi, N_rho, N_theta, scene_lim, N_x, N_y, N_z, ct_coord);
+                save(strcat(cartaddr,'md_',num2str(CAD_idx),'_pm_',num2str(ks+ind_os),'_cam_',num2str(cs),'_cart_heatmap2_noisy','.mat'), 'heatmap_ct');
                 
-                disp(strcat("Model ", num2str(CAD_idx),", placement ", num2str(ks+os),", camera ", num2str(cs), " finished"));           
+                disp(strcat("Model ", num2str(CAD_idx),", placement ", num2str(ks+ind_os),", camera ", num2str(cs), " finished"));           
                 clk = clock; disp(clk); %format shortg
             end
         end
