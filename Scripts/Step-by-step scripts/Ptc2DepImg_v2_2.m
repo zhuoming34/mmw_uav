@@ -23,7 +23,7 @@ r1 = 0.1; r2 = 15.0; % meter
 h = r2*tan(hfov/2); v = r2*tan(vfov/2); % max range the camera covers
 
 % scene boundary
-scene_corners = [-4,3,-1.25; -4,3,2.75;  4,3,-1.25; 4,3,2.75];
+scene_corners = [-3,2,-1.25; -3,2,1.75;  3,2,-1.25; 3,2,1.75];
 %pts = [ptCloud;scene_corners];
 sn_x = scene_corners(:,1); sn_y = scene_corners(:,2); sn_z = scene_corners(:,3);
 
@@ -33,7 +33,7 @@ sn_ratio = sn_y./sn_py;
 sn_px = -sn_x./sn_ratio;
 sn_pz = -sn_z./sn_ratio;
 
-model_idx = 7;
+model_idx = 1;
 os = 0; % index offset
 dy = 0; %5*sqrt(2)-5;
 camos = 0;
@@ -45,7 +45,7 @@ outaddr2 = strcat(addr0,'model',num2str(model_idx),'/fig/extend/');
 outaddr3 = strcat(addr0,'model',num2str(model_idx),'/fig/color128/');
 outaddr4 = strcat(addr0,'model',num2str(model_idx),'/fig/gray128/');
 
-for idx = 1:2500
+for idx = 1:500
     for cam = 1:4
         filename = strcat('md_',num2str(model_idx),'_pm_',num2str(idx+os),'_cam_',num2str(cam+camos),'_CameraReflector.mat');
         path = strcat(addr,filename);
