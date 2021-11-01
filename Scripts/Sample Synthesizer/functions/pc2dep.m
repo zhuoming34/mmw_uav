@@ -1,4 +1,9 @@
-function [Dep1,Dep2,reszImg] = pc2dep(ptCloud)
+function [depImg,reszImg,squrImg] = pc2dep(ptCloud)
+% converts a point cloud into a 2d depth image
+% Input: 'ptCloud': a point cloud of a surface
+% Output: 'depImg': original size of a depth image
+%         'reszImg': extended/cropped depth image
+%         'squrImg': scaled reszImg to be square
 
     variable_library_camera; % load camera configurations
     
@@ -103,9 +108,9 @@ function [Dep1,Dep2,reszImg] = pc2dep(ptCloud)
     I2 = It;
 
     % saving images
-    Dep1 = abs(I - 1)*255;
-    Dep2 = abs(I2 - 1)*255;
-    reszImg = imresize(Dep2, [128,128]);
+    depImg = abs(I - 1)*255;
+    reszImg = abs(I2 - 1)*255;
+    squrImg = imresize(reszImg, [128,128]);
     %{
     map = jet;
     map2 = gray;
