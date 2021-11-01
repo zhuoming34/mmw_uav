@@ -1,15 +1,22 @@
+function heatmap_ct = heatSph2Cart(heatmap_sph, N_phi, N_rho, N_theta, scene_lim, N_x, N_y, N_z, ct_coord)      
 %function heatmap_ct = heatSph2Cart(heatmap, scene_lim, N_x, N_y, N_z, ptGrid, ptGrid_heat, ptGrid_clss)
-function heatmap_ct = heatSph2Cart(heatmap, scene_lim, N_x, N_y, N_z, ct_coord)        
+% Converts a 3d intesity map from spherical coordinates to Cartesian coordinates
+% Input: 'heatmap_sph': the 3d intensity map in spherical coordinates
+%        'N_phi', 'N_rho', 'N_theta': size of the spherical heatmap
+%        'scene_lim': boundaries of a specified region
+%        'N_x', 'N_y', 'N_z': size of the Cartesian heatmap
+%        'ct_coord': center points of voxels in a 3D grid 
+% Output: 'heatmap_ct': the 3d intensity map in Cartesian coordinates within a specified region
     addpath('sph2cart_functions');
 
     % match intensity values to corresponding spherical voxel center
-    radar_heat = matchHeat(heatmap,N_phi,N_rho,N_theta);
+    radar_heat = matchHeat(heatmap_sph,N_phi,N_rho,N_theta);
     %for i = 1:length(ptGrid_clss)
     %    ptGrid_heat(i) = radar_heat(ptGrid_clss(i));
     %end 
 
     % filtering: get points whose intensities are larger than the threshold
-    threshold = max(max(max(heatmap)))/50;
+    threshold = max(max(max(heatmap_sph)))/50;
     %idx_heat_fliter = find(ptGrid_heat >= threshold);
     idx_heat_fliter = find(radar_heat >= threshold);
     points_selected = zeros(size(idx_heat_fliter,1),3);
