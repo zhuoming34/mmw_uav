@@ -4,12 +4,12 @@
 % from spherical coordinates (r,theta,phi)to cartesian coordinates (x,y,z)
 % take the logarithmic value to scale the heatmap, reduce the differences
 % between strong and weak signals.
-close all; clear; clc;
+%close all; clear; clc;
 format shortg;
 
 N_phi = 64; N_rho = 256; N_theta = 64;
 N_x= 64; N_y = 256; N_z = 64;
-scene_lim = [-3, 3; 2, 8; -1.25, 2.75];
+scene_lim = [-3, 3; 2, 8; -1.25, 1.75];
 
 % convert points into cartesian coordinates
 [x_ct,y_ct,z_ct] = sph2cart_pts(N_phi,N_rho,N_theta);
@@ -24,16 +24,20 @@ ct_coord = [x_ct,y_ct,z_ct];
 
 addr = '/home/huang/Documents/HawkEye-Data-Code-master/Synthesizer/model1/20210402/heat2ss/';
 saveaddr = '/home/huang/Documents/HawkEye-Data-Code-master/Synthesizer/model1/20210402/cart2ss/';
+
+addr = 'F:\3_Education\UMASS\Courses\droneSLAM\mmWave\hawkeye synthesizer\mats\';
+saveaddr = 'F:\3_Education\UMASS\Courses\droneSLAM\mmWave\hawkeye synthesizer\mats\';
+
 offset = 0;
 camos = 0;
-CAD_idx = 10;
+CAD_idx = 1;
  
-for idx_mat = 1:500
-    for cam = 1:4
+for idx_mat = 1
+    for cam = 1
         %filename = strcat('md_',num2str(CAD_idx),'_pm_',num2str(idx_mat+offset),'_cam_',num2str(cam),'_radar_heatmap2_noisy');
         %mat = load(strcat(addr,filename,'.mat'));
         %heatmap = mat.radar_heatmap_noisy;
-        heatmap = radar_heatmap_noisy;
+        heatmap = radar_heatmap;
         % match intensity values to corresponding spherical voxel center
         radar_heat = matchHeat(heatmap,N_phi,N_rho,N_theta);
         
@@ -42,7 +46,7 @@ for idx_mat = 1:500
         %end 
         
         % filtering: get points whose intensities are larger than the threshold
-        threshold = max(max(max(heatmap)))/50;
+        threshold = 0;%max(max(max(heatmap)))/50;
         %idx_heat_fliter = find(ptGrid_heat >= threshold);
         idx_heat_fliter = find(radar_heat >= threshold);
         points_selected = zeros(size(idx_heat_fliter,1),3);
@@ -82,7 +86,7 @@ end
 
 
 %% plots
-show_plots = 1; idx_plots = [1];
+show_plots = 1; idx_plots = [4];
 if show_plots == 1
     for idx_plot = idx_plots
         if idx_plot == 1 || idx_plot == 3
@@ -110,7 +114,19 @@ if show_plots == 1
         end
         % plot 3d heatmap slice
         if idx_plot == 4
-            show_slice_heat_3d(heatmap_ct)
+            div_c = floor(log10(max(max(max(heatmap_ct))))) - 2;
+            heatmap_ct_scaled = heatmap_ct/(10^div_c);
+            heatmap_ct_scaled = log(heatmap_ct_scaled+1);
+    
+            div_s = floor(log10(max(max(max(radar_heatmap))))) - 2;
+            heatmap_sph_scaled = radar_heatmap/(10^div_s);
+            heatmap_sph_scaled = log(heatmap_sph_scaled+1);
+            
+            reflectors = reflector_cart_v;
+            show_slice_heat_3d(heatmap_ct_scaled)
+            show_heatmap2d_cart(heatmap_ct_scaled,reflectors)
+            show_slice_heat_3d_sph(heatmap_sph_scaled)
+            show_heatmap2d(heatmap_sph_scaled,reflectors)
             %view(0,0) % front(0,0), top(0,90), left(-90,0),right(90,0)
         end
     end
@@ -266,12 +282,14 @@ end
 function show_heatmap2d(heatmap,cam_rft)
     maxheat = max(max(max(heatmap)));
     figure(); 
+    sgtitle("Spherical intensity maps in 3-view drawing");
     font_size = 8;
     
-    % Visulize the camera reflectors
+    % Visulize the radar reflectors
     subplot(221); scatter3(cam_rft(:,1),cam_rft(:,2),cam_rft(:,3),0.5,'filled','k');
+    title("Radar reflectors"),
     xlabel('x (m)'); ylabel('y (m)'); zlabel('z (m)'); axis equal;
-    xlim([-4 4]); ylim([0 10]); set(gca,'FontSize',font_size);      
+    xlim([-4 4]); ylim([0 10]); zlim([-1.25, 1.75]); set(gca,'FontSize',font_size);      
     view(15,30)
     
     xt = linspace(1,64,5);  % az
@@ -312,16 +330,17 @@ end
 % plot 2d radar heatmaps in Cartesian coordinates
 function show_heatmap2d_cart(heatmap,reflectors)   
     maxheat = max(max(max(heatmap)));
-    figure(); 
+    figure(); sgtitle("Cartesian intensity maps in 3-view drawing");
     font_size = 8;
-    % Visulize the camera reflectors
-    subplot(221); scatter3(reflectors(:,1),reflectors(:,2),reflectors(:,3),0.5,'filled','k');
+    % Visulize the radar reflectors
+    subplot(221), scatter3(reflectors(:,1),reflectors(:,2),reflectors(:,3),0.5,'filled','k');
+    title("Radar reflectors"),
     xlabel('x (m)'); ylabel('y (m)'); zlabel('z (m)'); axis equal
-    xlim([-4, 4]); ylim([0, 10]); zlim([-1.25, 2.75]); 
+    xlim([-4, 4]); ylim([0, 10]); zlim([-1.25, 1.75]); 
     set(gca,'FontSize',font_size);      
     view(15,30)
        
-    xt = linspace(1,64,9); yt = linspace(1,256,8); zt = linspace(1,64,17); 
+    xt = linspace(1,64,9); yt = linspace(1,256,7); zt = linspace(1,64,13); 
     
     % Visulize the radar heatmap side view
     radar_heatmap_side = squeeze(max(heatmap,[],2));
@@ -330,10 +349,10 @@ function show_heatmap2d_cart(heatmap,reflectors)
     set(gca,'XDir','normal');set(gca,'YDir','normal');
     colormap jet; caxis([0 maxheat]); colorbar;
     xlabel('y(m)'); ylabel('z(m)'); set(gca,'FontSize',font_size);
-    xticks(yt); xticklabels({'3','4','5','6','7','8','9','10'})
+    xticks(yt); xticklabels({'2','3','4','5','6','7','8'})
     yticks(zt); 
     yticklabels({'-1.25','-1','-0.75','-0.5','-0.25','-0','0.25',...
-        '0.5','0.75','1','1.25','1.5','1.75','2','2.25','2.5','2.75'});
+        '0.5','0.75','1','1.25','1.5','1.75'});
     
     
     % Visulize the radar heatmap front view
@@ -369,7 +388,7 @@ function show_ct_pt(ct_coord)
     %view(15,30)
 end
 
-% plot 3d heatmap slice
+% plot 3d heatmap slice in Cartesian
 function show_slice_heat_3d(heatmap_ct)
     m = size(heatmap_ct, 2); % az
     n = size(heatmap_ct, 3); % el
@@ -384,15 +403,50 @@ function show_slice_heat_3d(heatmap_ct)
     zslice = 1:n;    % location of x-y planes
     
     figure(); h = slice(XX,YY,ZZ,heatmap_ct,xslice,yslice,zslice);
+    title("3D intesity map in Cartesian");
     xlabel('x(m)'); ylabel('y(m)'); zlabel('z(m)');
     xlim([0 64]); ylim([0 256]); zlim([0,64]);
     xt = linspace(0,64,9); xticks(xt); 
     xticklabels({'-4','-3','-2','-1','0','1','2','3','4'})
-    yt = linspace(0,256,8); yticks(yt); 
-    yticklabels({'3','4','5','6','7','8','9','10'})
-    zt = linspace(0,64,17); zticks(zt); 
+    yt = linspace(0,256,7); yticks(yt); 
+    yticklabels({'2','3','4','5','6','7','8'})
+    zt = linspace(0,64,13); zticks(zt); 
     zticklabels({'-1.25','-1','-0.75','-0.5','-0.25','-0','0.25',...
-        '0.5','0.75','1','1.25','1.5','1.75','2','2.25','2.5','2.75'});
+        '0.5','0.75','1','1.25','1.5','1.75'});
+    %set(h,'EdgeColor','none','FaceColor','interp','FaceAlpha','interp');
+    set(h,'EdgeColor','none','FaceColor','flat','FaceAlpha','flat');
+    %set(h,'EdgeColor','none','FaceColor','flat','FaceAlpha','0.01');
+    % set transparency to correlate to the data values.
+    alpha('color'); %alpha(h, 0.01);
+    colorbar; colormap jet;
+end
+
+% plot 3d heatmap slice
+function show_slice_heat_3d_sph(heatmap_sph)
+    m = size(heatmap_sph, 2); % az
+    n = size(heatmap_sph, 3); % el
+    l = size(heatmap_sph, 1); % rg
+    xi = linspace(1,l,l); % range
+    yi = linspace(1,m,m); % azimuth
+    zi = linspace(1,n,n); % elevation
+    [XX,YY,ZZ] = meshgrid(yi,xi,zi); % [l * m * n]
+
+    xslice = 1:m;    % location of y-z planes
+    yslice = 1:l;    % location of x-z plane
+    zslice = 1:n;    % location of x-y planes
+    
+    
+    figure(); h = slice(XX,YY,ZZ,heatmap_sph,xslice,yslice,zslice);
+    title("3D intesity map in Spherical");
+    xlabel('Azimuth(deg)'); ylabel('Range(m)'); zlabel('Elevation(deg)');
+    xlim([0 64]); ylim([0 256]); zlim([0,64]);
+    xt = linspace(1,64,5);  % az
+    xticks(xt); xticklabels({'30','60','90','120','150'})
+    yt = linspace(1,256,11); % rg
+    yticks(yt); yticklabels({'0','1','2','3','4','5','6','7','8','9','10'})
+    zt = linspace(1,64,7);  % el
+    zticks(zt); zticklabels({'75','80','85','90','95','100','105'});
+    set(gca,'XDir','reverse'); set(gca,'ZDir','reverse');
     %set(h,'EdgeColor','none','FaceColor','interp','FaceAlpha','interp');
     set(h,'EdgeColor','none','FaceColor','flat','FaceAlpha','flat');
     %set(h,'EdgeColor','none','FaceColor','flat','FaceAlpha','0.01');
