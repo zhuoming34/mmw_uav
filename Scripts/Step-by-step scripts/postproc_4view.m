@@ -16,7 +16,7 @@ sweep_slope = 29.982e+12; % Hz/s
 
 numFrames = 100;
 numADCSamples = L;
-numChirp = 16; % number of chirps per frame 
+numChirp = 16; % number of chirps per antenna per frame 
 numSnap = 64;
 numHz = 3; % #horizontal posstions
 %SARdata = zeros(numSnap*2,numADCSamples*3); % 256x768, 64*4=256 RX
